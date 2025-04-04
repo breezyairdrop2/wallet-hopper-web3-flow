@@ -1,41 +1,34 @@
 
-import { configureChains, createConfig } from 'wagmi';
+import { createConfig, http } from 'wagmi';
 import { mainnet, sepolia, polygon, optimism, arbitrum } from 'wagmi/chains';
-import { MetaMaskConnector } from 'wagmi/connectors/metaMask';
-import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
-import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet';
-import { publicProvider } from 'wagmi/providers/public';
-import { alchemyProvider } from 'wagmi/providers/alchemy';
+import { injected, walletConnect, coinbaseWallet } from 'wagmi/connectors';
 
-// Optional: Use Alchemy provider if available
-const providers = [
-  publicProvider(),
-];
-
-const { chains, publicClient, webSocketPublicClient } = configureChains(
-  [mainnet, sepolia, polygon, optimism, arbitrum],
-  providers
-);
-
+// Create the wagmi config
 export const config = createConfig({
-  autoConnect: true,
+  chains: [mainnet, sepolia, polygon, optimism, arbitrum],
+  transports: {
+    [mainnet.id]: http(),
+    [sepolia.id]: http(),
+    [polygon.id]: http(),
+    [optimism.id]: http(),
+    [arbitrum.id]: http(),
+  },
   connectors: [
-    new MetaMaskConnector({ chains }),
-    new CoinbaseWalletConnector({
-      chains,
-      options: {
-        appName: 'Multi Wallet DApp',
-      },
+    injected(),
+    coinbaseWallet({
+      appName: 'Multi Wallet DApp',
     }),
-    new WalletConnectConnector({
-      chains,
-      options: {
-        projectId: 'YOUR_WALLET_CONNECT_PROJECT_ID', // Replace with actual project ID
+    walletConnect({
+      projectId: 'YOUR_WALLET_CONNECT_PROJECT_ID', // Replace with actual project ID
+      metadata: {
+        name: 'Multi Wallet DApp',
+        description: 'A DApp for managing multiple wallets',
+        url: window.location.origin,
+        icons: [],
       },
     }),
   ],
-  publicClient,
-  webSocketPublicClient,
 });
 
-export { chains };
+// Export the chains
+export const chains = [mainnet, sepolia, polygon, optimism, arbitrum];

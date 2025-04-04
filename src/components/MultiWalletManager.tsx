@@ -1,9 +1,10 @@
 
 import { useState, useEffect } from 'react';
-import { useAccount, useConnect, useDisconnect, useBalance, useNetwork } from 'wagmi';
+import { useAccount, useConnect, useDisconnect, useBalance, useChainId } from 'wagmi';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { chains } from '../config/web3Config';
 
 // Define a wallet type to store connected wallets
 interface ConnectedWallet {
@@ -20,9 +21,9 @@ const MultiWalletManager = () => {
   const { address, connector, isConnected } = useAccount();
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
-  const { chain } = useNetwork();
+  const chainId = useChainId();
   const { data: balanceData } = useBalance({
-    address: address,
+    address,
   });
 
   // When a wallet connects, add it to our list if not already present
@@ -176,7 +177,7 @@ const MultiWalletManager = () => {
             {index === activeWalletIndex && balanceData && (
               <div className="mt-2 p-2 bg-secondary/50 rounded text-sm">
                 <p>Balance: {balanceData.formatted} {balanceData.symbol}</p>
-                <p>Network: {chain?.name || 'Unknown'}</p>
+                <p>Network: {chains.find(c => c.id === chainId)?.name || 'Unknown'}</p>
               </div>
             )}
           </div>

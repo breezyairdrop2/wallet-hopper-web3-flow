@@ -1,16 +1,17 @@
 
 import { useState } from 'react';
-import { useConnect, useAccount, useDisconnect, useNetwork, useSwitchNetwork } from 'wagmi';
+import { useConnect, useAccount, useDisconnect, useChainId, useSwitchChain } from 'wagmi';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
+import { chains } from '../config/web3Config';
 
 const WalletConnect = () => {
   const { connectors, connect, isPending, isError, error } = useConnect();
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
-  const { chain } = useNetwork();
-  const { chains, switchNetwork } = useSwitchNetwork();
+  const chainId = useChainId();
+  const { switchChain } = useSwitchChain();
 
   // Handle connection errors
   if (isError && error) {
@@ -53,7 +54,7 @@ const WalletConnect = () => {
             
             <div className="p-4 rounded-lg bg-secondary">
               <p className="text-sm text-muted-foreground">Network</p>
-              <p className="font-bold">{chain?.name || 'Unknown'}</p>
+              <p className="font-bold">{chains.find(c => c.id === chainId)?.name || 'Unknown'}</p>
             </div>
             
             <div className="mt-4">
@@ -62,10 +63,10 @@ const WalletConnect = () => {
                 {chains.map((c) => (
                   <Button
                     key={c.id}
-                    onClick={() => switchNetwork?.(c.id)}
-                    disabled={!switchNetwork || chain?.id === c.id}
+                    onClick={() => switchChain({ chainId: c.id })}
+                    disabled={!switchChain || chainId === c.id}
                     className="text-sm"
-                    variant={chain?.id === c.id ? "default" : "outline"}
+                    variant={chainId === c.id ? "default" : "outline"}
                   >
                     {c.name}
                   </Button>

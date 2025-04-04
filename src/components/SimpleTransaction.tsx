@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { useAccount, useSendTransaction, usePrepareSendTransaction, useWaitForTransaction } from 'wagmi';
+import { useAccount, useSendTransaction } from 'wagmi';
 import { parseEther } from 'viem';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,33 +13,29 @@ const SimpleTransaction = () => {
   const [amount, setAmount] = useState('');
   const { address, isConnected } = useAccount();
 
-  // Prepare the transaction with validation
-  const { config, error: prepareError } = usePrepareSendTransaction({
-    to: recipient,
-    value: amount ? parseEther(amount) : undefined,
-    enabled: Boolean(recipient && amount && isConnected),
-  });
-
   // Hook to send the transaction
-  const { sendTransaction, isLoading, error: sendError } = useSendTransaction(config);
+  const { sendTransaction, isPending, error } = useSendTransaction();
   
   // Handle the transaction
-  const handleSendTransaction = () => {
-    if (!sendTransaction) {
-      toast.error("Transaction not ready. Please check the details.");
+  const handleSendTransaction = async () => {
+    if (!recipient || !amount) {
+      toast.error("Please enter recipient address and amount");
       return;
     }
     
     try {
-      sendTransaction();
+      await sendTransaction({
+        to: recipient,
+        value: parseEther(amount),
+      });
       toast.success("Transaction sent!");
-    } catch (error) {
+    } catch (err) {
       toast.error("Failed to send transaction.");
+      console.error("Transaction error:", err);
     }
   };
 
   // Show errors
-  const error = prepareError || sendError;
   if (error) {
     toast.error(`Error: ${error.message}`);
   }
@@ -87,9 +83,9 @@ const SimpleTransaction = () => {
         <Button
           className="w-full wallet-gradient text-white font-medium"
           onClick={handleSendTransaction}
-          disabled={isLoading || !sendTransaction}
+          disabled={isPending}
         >
-          {isLoading ? 'Sending...' : 'Send Transaction'}
+          {isPending ? 'Sending...' : 'Send Transaction'}
         </Button>
       </CardFooter>
     </Card>
