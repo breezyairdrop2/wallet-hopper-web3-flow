@@ -19,7 +19,7 @@ export const config = createConfig({
       appName: 'Multi Wallet DApp',
     }),
     walletConnect({
-      projectId: 'YOUR_WALLET_CONNECT_PROJECT_ID', // Replace with actual project ID
+      projectId: '71284d4eebb94119e15d9281752b6c88', // Replace with actual project ID
       metadata: {
         name: 'Multi Wallet DApp',
         description: 'A DApp for managing multiple wallets',
